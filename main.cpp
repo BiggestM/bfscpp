@@ -1,38 +1,76 @@
 #include <iostream>
 #include <queue>
-#include <unordered_set>
 #include <vector>
+#include <algorithm>
 
 using namespace std;
 
-void bfs(const vector<vector<int>>& graph, int startNode) {
+vector<int> bfs(const vector<vector<int>>& tree, int start, int target) {
+    vector<bool> visited(tree.size(), false);
     queue<int> q;
-    unordered_set<int> visited;
+    vector<int> traversal;
 
-    q.push(startNode);
-    visited.insert(startNode);
+    q.push(start);
 
     while (!q.empty()) {
-        int currentNode = q.front();
+        int current = q.front();
         q.pop();
-        cout << currentNode << " "; // Process the current node
+        traversal.push_back(current);
 
-        for (int neighbor : graph[currentNode]) {
-            if (visited.find(neighbor) == visited.end()) {
-                q.push(neighbor);
-                visited.insert(neighbor);
+        for (int child : tree[current]) {
+            if (!visited[child]) {
+                visited[child] = true;
+                q.push(child);
             }
         }
+
+        // If the target node is found, break the loop
+        if (current == target) {
+            break;
+        }
     }
+
+    return traversal;
 }
 
 int main() {
-    // Example graph represented as an adjacency list
-    vector<vector<int>> graph = {{1, 2}, {0, 3, 4}, {0, 4}, {1}, {1, 2}};
+    int totalNodes, numChildren, targetNode;
 
-    cout << "BFS starting from node 0: ";
-    bfs(graph, 0);
+    // Get user input for the total number of nodes and number of children per node
+    cout << "Enter the total number of nodes: ";
+    cin >> totalNodes;
+
+    cout << "Enter the number of children for each node: ";
+    cin >> numChildren;
+
+    // Build the tree structure
+    vector<vector<int>> tree(totalNodes);
+    for (int i = 0; i < totalNodes; ++i) {
+        for (int j = 1; j <= numChildren && i + j < totalNodes; ++j) {
+            tree[i].push_back(i + j);
+        }
+    }
+
+    // Get user input for the target node to visit
+    cout << "Enter the node you want to visit: ";
+    cin >> targetNode;
+
+    // Perform BFS and get the path to the target node
+    vector<int> path = bfs(tree, 0, targetNode);
+
+    // Display the result
+    cout << "Visited nodes during BFS up to node " << targetNode << ": ";
+    if (find(path.begin(), path.end(), targetNode) != path.end()) {
+        for (int node : path) {
+            cout << node << " ";
+        }
+    } else {
+        cout << "Node not found. Visited nodes: ";
+        for (int node : path) {
+            cout << node << " ";
+        }
+    }
+    cout << endl;
 
     return 0;
 }
-
